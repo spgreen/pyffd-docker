@@ -1,0 +1,23 @@
+version: "2.2"
+services:
+   pyff:
+      image: pyff:1.0.1-v2
+      container_name: pyffd
+      mem_limit: 2g
+      memswap_limit: 2g
+      environment:
+        - "PIPELINE=/metadata/sources/sgaf.fd"
+        - "EXTRA_ARGS=--frequency=43200 -a"
+        - "TZ=Asia/Singapore"
+      volumes:
+        - ./metadata:/metadata
+      ports:
+        - 8080:8080/tcp
+      restart: always
+ 
+networks:
+  default:
+    external:
+      name: jagger_default
+      
+
