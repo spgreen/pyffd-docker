@@ -1,14 +1,12 @@
 - when update:
-    - load:
-       #- http://mds.edugain.org//edugain-v1.xml 1D:70:87:71:A7:6E:EA:D8:00:11:CC:55:35:67:3E:8C:19:1F:62:C0
-       - http://jagger.singaren.net.sg/rr3/metadata/federation/sgaf-edugain-export/metadata.xml
-       - http://jagger.singaren.net.sg/rr3/metadata/federation/sgaf-local/metadata.xml
-    - select as /sgaf-export:
-       - http://jagger.singaren.net.sg/rr3/metadata/federation/sgaf-edugain-export/metadata.xml
-    - select as /sgaf-local:
-       - http://jagger.singaren.net.sg/rr3/metadata/federation/sgaf-local/metadata.xml
-#    - select as /sgaf-edugain:
-#       - http://mds.edugain.org//edugain-v1.xml!md:EntityDescriptor[md:SPSSODescriptor]
+    -  load:
+       - http://mds.edugain.org//edugain-v1.xml 1D:70:87:71:A7:6E:EA:D8:00:11:CC:55:35:67:3E:8C:19:1F:62:C0
+    - load as /sgaf-local:
+       - https://manager.sgaf.org.sg/rr3/metadata/federation/sgaf-local/metadata.xml
+    - load as /sgaf-export:
+       - https://manager.sgaf.org.sg/rr3/metadata/federation/sgaf-edugain-export/metadata.xml
+    - select as /sgaf-edugain:
+       - http://mds.edugain.org//edugain-v1.xml!md:EntityDescriptor[md:SPSSODescriptor]
     - break
 - when request:
     - select
@@ -17,13 +15,25 @@
              - xslt:
                  stylesheet: tidy.xsl
              - pubinfo:
-                publisher: https://ds.sgaf.org.sg
+                 publisher: https://ds.sgaf.org.sg
              - first
-             - finalize:
-                cacheDuration: PT5H
-                validUntil: P7D
+             - when path /sgaf-local:
+                 - finalize:
+                     Name: https://ds.sgaf.org.sg/distribution/metadata/sgaf-metadata.xml
+                     cacheDuration: PT5H
+                     validUntil: P7D
+             - when path /sgaf-export:
+                 - finalize:
+                     Name: https://ds.sgaf.org.sg/distribution/metadata/sgaf-edugain-export-metadata.xml
+                     cacheDuration: PT5H
+                     validUntil: P7D
+             - when path /sgaf-edugain:
+                 - finalize:
+                     Name: https://ds.sgaf.org.sg/distribution/metadata/sgaf-edugain-metadata.xml
+                     cacheDuration: PT5H
+                     validUntil: P7D
              - sign:
-                 key: /metadata/keypairs/sign.key 
+                 key: /metadata/keypairs/sign.key
                  cert: /metadata/keypairs/sign.crt
              - emit application/xml
              - break
